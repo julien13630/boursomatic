@@ -40,6 +40,11 @@ backend/
 - Tools: gcloud CLI, Terraform >= 1.5.0, Docker
 - Permissions: Owner/Editor role on GCP project
 
+**Check prerequisites**: Run the validation script first!
+```bash
+./scripts/check-prerequisites.sh
+```
+
 ### Deploy Infrastructure
 
 ```bash
