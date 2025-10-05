@@ -1,0 +1,241 @@
+Boursomatic Database Schema - Visual Overview
+=============================================
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          USERS & AUTHENTICATION                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────┐
+    │        users            │
+    ├─────────────────────────┤
+    │ • id (PK, UUID)         │
+    │ • email (unique)        │
+    │ • password_hash         │
+    │ • is_admin              │
+    │ • is_deleted            │◄──── Soft delete support
+    │ • created_at            │
+    └────────┬────────────────┘
+             │
+             │ 1:1
+             │
+             ▼
+    ┌─────────────────────────────────────┐
+    │      user_settings                  │
+    ├─────────────────────────────────────┤
+    │ • id (PK, UUID)                     │
+    │ • user_id (FK → users.id, unique)   │
+    │ • risk_consent_accepted             │◄──── Compliance requirement
+    │ • risk_consent_accepted_at          │
+    │ • preferred_profile                 │◄──── conservative/moderate/aggressive
+    │ • created_at, updated_at            │
+    └─────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      MARKET DATA & INSTRUMENTS                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────┐
+    │       instruments            │
+    ├──────────────────────────────┤
+    │ • id (PK, UUID)              │
+    │ • symbol (AAPL, MSFT, etc.)  │
+    │ • exchange (NASDAQ, etc.)    │
+    │ • name                       │
+    │ • sector                     │
+    │ • market_cap_bucket          │◄──── small/mid/large
+    │ • pe_bucket                  │◄──── low/medium/high
+    │ • is_active                  │
+    │ • created_at, updated_at     │
+    └──────┬───────────────────────┘
+           │
+           │ 1:N
+           │
+           ├──────────────────────────────┐
+           │                              │
+           ▼                              ▼
+    ┌──────────────────┐         ┌──────────────────────┐
+    │   price_bars     │         │      features        │
+    ├──────────────────┤         ├──────────────────────┤
+    │ • id (PK)        │         │ • id (PK)            │
+    │ • instrument_id  │         │ • instrument_id      │
+    │ • ts             │         │ • ts                 │
+    │ • o, h, l, c     │         │ • ret_1d, ret_5d     │
+    │ • v              │         │ • ret_20d            │
+    │ • interval       │◄────    │ • rsi_14             │
+    │ • created_at     │ daily   │ • momentum_5d        │
+    └──────────────────┘ 15m     │ • vol_20d            │
+                                 │ • atr_14             │
+    UNIQUE: (instrument_id,      │ • volume_zscore      │
+             ts, interval)       │ • additional_feats   │◄──── JSON for flexibility
+                                 │ • created_at         │
+                                 └──────────────────────┘
+
+                                 UNIQUE: (instrument_id, ts)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      ML MODELS & RECOMMENDATIONS                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │      model_versions              │
+    ├──────────────────────────────────┤
+    │ • id (PK, UUID)                  │
+    │ • version (v1.0.0, unique)       │
+    │ • trained_at                     │
+    │ • params_hash                    │◄──── Reproducibility
+    │ • metrics_json                   │◄──── Accuracy, F1, Sharpe, etc.
+    │ • model_path                     │
+    │ • is_active                      │◄──── Only one active at a time
+    │ • created_at                     │
+    └───────────┬──────────────────────┘
+                │
+                │ 1:N
+                │
+                ▼
+    ┌───────────────────────────────────────────────┐
+    │           recommendations                     │
+    ├───────────────────────────────────────────────┤
+    │ • id (PK, UUID)                               │
+    │ • instrument_id (FK → instruments.id)         │
+    │ • model_version_id (FK → model_versions.id)   │
+    │ • profile                                     │◄──── conservative/moderate/aggressive
+    │ • label                                       │◄──── BUY/HOLD/SELL
+    │ • confidence                                  │◄──── 0.0 to 1.0
+    │ • expected_return_pct                         │
+    │ • horizon_days                                │
+    │ • stop_loss, take_profit                      │
+    │ • justification                               │◄──── Human-readable explanation
+    │ • features_snapshot                           │◄──── JSON - full audit trail
+    │ • generated_at                                │
+    │ • is_active                                   │◄──── Archive old recommendations
+    └───────────────────────────────────────────────┘
+
+    Composite indexes:
+    - (is_active, generated_at)         ← Latest active recommendations
+    - (instrument_id, profile, date)    ← Per-instrument per-profile history
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           KEY DESIGN DECISIONS                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+1. UUID Primary Keys
+   ✓ Better distribution in distributed systems
+   ✓ No sequential ID leakage
+   ✓ Easier merging of data from multiple sources
+
+2. Soft Delete (is_deleted, is_active flags)
+   ✓ Maintains historical data integrity
+   ✓ Compliance & audit requirements
+   ✓ Can "undelete" if needed
+
+3. Multi-Profile Recommendations
+   ✓ Same instrument can have different recommendations per risk profile
+   ✓ Users select their preferred profile
+   ✓ Supports conservative, moderate, aggressive strategies
+
+4. Audit Trail
+   ✓ features_snapshot in recommendations captures exact state at inference
+   ✓ model_version_id links to exact model used
+   ✓ All timestamps for temporal analysis
+
+5. Flexible Features
+   ✓ Predefined columns for common indicators (ret_1d, rsi_14, etc.)
+   ✓ additional_features JSON for experimentation
+   ✓ Balance between structure and flexibility
+
+6. Time-Series Optimizations
+   ✓ Composite unique indexes prevent duplicates
+   ✓ Indexes on timestamp columns for range queries
+   ✓ partition-ready structure for price_bars and features
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            TYPICAL QUERIES                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+
+1. Get latest BUY recommendations for moderate profile:
+   SELECT r.*, i.symbol, i.exchange
+   FROM recommendations r
+   JOIN instruments i ON r.instrument_id = i.id
+   WHERE r.profile = 'moderate'
+     AND r.label = 'BUY'
+     AND r.is_active = true
+   ORDER BY r.confidence DESC, r.generated_at DESC
+   LIMIT 10;
+
+2. Get price history for an instrument:
+   SELECT ts, c as close_price, v as volume
+   FROM price_bars
+   WHERE instrument_id = :instrument_id
+     AND interval = 'daily'
+     AND ts >= NOW() - INTERVAL '1 year'
+   ORDER BY ts;
+
+3. Get features for model training:
+   SELECT f.*, pb.c as close_price
+   FROM features f
+   JOIN price_bars pb ON f.instrument_id = pb.instrument_id
+     AND f.ts = pb.ts
+     AND pb.interval = 'daily'
+   WHERE f.ts >= :start_date
+     AND f.ts <= :end_date
+   ORDER BY f.instrument_id, f.ts;
+
+4. Model performance tracking:
+   SELECT
+     mv.version,
+     mv.trained_at,
+     mv.metrics_json->>'precision' as precision,
+     mv.metrics_json->>'f1_score' as f1,
+     COUNT(r.id) as recommendations_count
+   FROM model_versions mv
+   LEFT JOIN recommendations r ON mv.id = r.model_version_id
+   GROUP BY mv.id
+   ORDER BY mv.trained_at DESC;
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          MIGRATION WORKFLOW                                │
+└───────────────────────────────────────────────────────────────────────────┘
+
+Development:
+  1. Create database: createdb boursomatic
+  2. Run migration: alembic upgrade head
+  3. Verify: psql -d boursomatic -c '\dt'
+
+Production:
+  1. Backup: pg_dump boursomatic > backup.sql
+  2. Test migration on staging
+  3. Run migration: alembic upgrade head
+  4. Verify data integrity
+  5. Monitor performance
+
+Rollback:
+  alembic downgrade -1  (or specific revision)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              NEXT STEPS                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+
+Phase 1: Data Ingestion
+  □ Implement price_bars ingestion from yfinance/Stooq
+  □ Historical: 8 years of daily data
+  □ Intraday: 30-day rolling 15-minute data
+
+Phase 2: Feature Engineering
+  □ Calculate technical indicators
+  □ Populate features table
+  □ Add incremental update logic
+
+Phase 3: ML Model
+  □ Train LightGBM classifier + regressor
+  □ Store in model_versions
+  □ Generate recommendations
+
+Phase 4: API & Auth
+  □ Implement user registration/login
+  □ JWT token management
+  □ CRUD endpoints for recommendations
+
+Phase 5: Frontend
+  □ Recommendations list/detail pages
+  □ Filtering by profile/label
+  □ User settings dashboard
