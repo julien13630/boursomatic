@@ -12,7 +12,6 @@ Handles NaN/border values appropriately with forward-fill and dropna strategies.
 import logging
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -192,9 +191,7 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     df = calculate_momentum(df, period=5)
     df = calculate_volatility(df, period=20)
     df = calculate_atr(df, period=14)
-    df = calculate_volume_zscore(df, period=20)
-    
-    return df
+    return calculate_volume_zscore(df, period=20)
 
 
 def handle_nan_values(df: pd.DataFrame, strategy: str = "drop") -> pd.DataFrame:

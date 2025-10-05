@@ -8,7 +8,7 @@ logging statistics and validating completeness.
 
 import logging
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -136,7 +136,7 @@ def test_features_for_ticker(session: Session, symbol: str, exchange: str = "NAS
         # Validate features
         stats = validate_features(features_df)
         
-        logger.info(f"Validation results:")
+        logger.info("Validation results:")
         logger.info(f"  Total rows: {stats['total_rows']}")
         logger.info(f"  Valid rows: {stats['valid_rows']}")
         logger.info(f"  Coverage: {stats['coverage_pct']:.2f}%")
@@ -145,7 +145,7 @@ def test_features_for_ticker(session: Session, symbol: str, exchange: str = "NAS
             logger.info(f"  NaN counts: {stats['nan_counts']}")
         
         # Log summary statistics for each feature
-        logger.info(f"\nFeature statistics:")
+        logger.info("\nFeature statistics:")
         for feature_name in get_feature_columns():
             if feature_name in features_df.columns:
                 feat_stats = stats['summary'][feature_name]
@@ -218,7 +218,7 @@ def main():
     
     # Detailed results table
     if success_count > 0:
-        logger.info(f"\nSuccessful ticker results:")
+        logger.info("\nSuccessful ticker results:")
         logger.info(
             f"{'Symbol':10s} {'Price Bars':>12s} {'Feature Rows':>14s} "
             f"{'Coverage':>10s} {'NaN Count':>10s}"
