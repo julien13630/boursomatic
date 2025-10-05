@@ -15,17 +15,18 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.models import (
-    User,
-    UserSetting,
-    Instrument,
-    PriceBar,
-    Feature,
-    ModelVersion,
-    Recommendation,
-)
 from datetime import datetime
 from uuid import uuid4
+
+from app.models import (
+    Feature,
+    Instrument,
+    ModelVersion,
+    PriceBar,
+    Recommendation,
+    User,
+    UserSetting,
+)
 
 
 def test_model_creation():

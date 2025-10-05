@@ -2,10 +2,11 @@
 Database configuration and session management.
 """
 
-from sqlmodel import create_engine, Session
-from sqlalchemy.pool import NullPool
 import os
+
 from dotenv import load_dotenv
+from sqlalchemy.pool import NullPool
+from sqlmodel import Session, create_engine
 
 load_dotenv()
 

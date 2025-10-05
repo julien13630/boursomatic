@@ -8,8 +8,9 @@ Includes support for soft delete and multi-profile recommendations.
 from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
-from sqlmodel import Field, SQLModel, Relationship, Column, TEXT, JSON
+
 from sqlalchemy import Index
+from sqlmodel import JSON, TEXT, Column, Field, Relationship, SQLModel
 
 
 class User(SQLModel, table=True):
@@ -40,8 +41,8 @@ class UserSetting(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="users.id", unique=True, index=True)
     risk_consent_accepted: bool = Field(default=False)
-    risk_consent_accepted_at: Optional[datetime] = Field(default=None)
-    preferred_profile: Optional[str] = Field(default="moderate", max_length=50)  # conservative, moderate, aggressive
+    risk_consent_accepted_at: datetime | None = Field(default=None)
+    preferred_profile: str | None = Field(default="moderate", max_length=50)  # conservative, moderate, aggressive
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -59,10 +60,10 @@ class Instrument(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     symbol: str = Field(index=True, max_length=50)
     exchange: str = Field(index=True, max_length=50)  # NYSE, NASDAQ, EURONEXT, etc.
-    name: Optional[str] = Field(default=None, max_length=255)
-    sector: Optional[str] = Field(default=None, max_length=100)
-    market_cap_bucket: Optional[str] = Field(default=None, max_length=50)  # small, mid, large
-    pe_bucket: Optional[str] = Field(default=None, max_length=50)  # low, medium, high
+    name: str | None = Field(default=None, max_length=255)
+    sector: str | None = Field(default=None, max_length=100)
+    market_cap_bucket: str | None = Field(default=None, max_length=50)  # small, mid, large
+    pe_bucket: str | None = Field(default=None, max_length=50)  # low, medium, high
     is_active: bool = Field(default=True, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -85,7 +86,7 @@ class PriceBar(SQLModel, table=True):
     ts: datetime = Field(index=True)  # timestamp
     o: float = Field()  # open
     h: float = Field()  # high
-    l: float = Field()  # low
+    l: float = Field()  # low  # noqa: E741
     c: float = Field()  # close
     v: float = Field()  # volume
     interval: str = Field(index=True, max_length=10)  # 'daily', '15m', etc.
@@ -111,19 +112,19 @@ class Feature(SQLModel, table=True):
     ts: datetime = Field(index=True)
     
     # Returns
-    ret_1d: Optional[float] = Field(default=None)
-    ret_5d: Optional[float] = Field(default=None)
-    ret_20d: Optional[float] = Field(default=None)
+    ret_1d: float | None = Field(default=None)
+    ret_5d: float | None = Field(default=None)
+    ret_20d: float | None = Field(default=None)
     
     # Technical indicators
-    rsi_14: Optional[float] = Field(default=None)
-    momentum_5d: Optional[float] = Field(default=None)
-    vol_20d: Optional[float] = Field(default=None)  # volatility
-    atr_14: Optional[float] = Field(default=None)  # average true range
-    volume_zscore: Optional[float] = Field(default=None)
+    rsi_14: float | None = Field(default=None)
+    momentum_5d: float | None = Field(default=None)
+    vol_20d: float | None = Field(default=None)  # volatility
+    atr_14: float | None = Field(default=None)  # average true range
+    volume_zscore: float | None = Field(default=None)
     
     # Additional features can be added via JSON for flexibility
-    additional_features: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    additional_features: dict | None = Field(default=None, sa_column=Column(JSON))
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -146,7 +147,7 @@ class ModelVersion(SQLModel, table=True):
     trained_at: datetime = Field(default_factory=datetime.utcnow)
     params_hash: str = Field(max_length=64)  # Hash of model parameters for reproducibility
     metrics_json: dict = Field(sa_column=Column(JSON))  # Training/validation metrics
-    model_path: Optional[str] = Field(default=None, max_length=500)  # Path to serialized model
+    model_path: str | None = Field(default=None, max_length=500)  # Path to serialized model
     is_active: bool = Field(default=False, index=True)  # Current production model
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
@@ -169,13 +170,13 @@ class Recommendation(SQLModel, table=True):
     profile: str = Field(index=True, max_length=50)  # conservative, moderate, aggressive
     label: str = Field(index=True, max_length=10)  # BUY, HOLD, SELL
     confidence: float = Field()  # 0.0 to 1.0
-    expected_return_pct: Optional[float] = Field(default=None)
-    horizon_days: Optional[int] = Field(default=None)
-    stop_loss: Optional[float] = Field(default=None)
-    take_profit: Optional[float] = Field(default=None)
+    expected_return_pct: float | None = Field(default=None)
+    horizon_days: int | None = Field(default=None)
+    stop_loss: float | None = Field(default=None)
+    take_profit: float | None = Field(default=None)
     
     # Audit and explainability
-    justification: Optional[str] = Field(default=None, sa_column=Column(TEXT))
+    justification: str | None = Field(default=None, sa_column=Column(TEXT))
     features_snapshot: dict = Field(sa_column=Column(JSON))  # Feature values at inference time
     
     generated_at: datetime = Field(default_factory=datetime.utcnow, index=True)
