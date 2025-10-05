@@ -1,0 +1,48 @@
+# Cloud Scheduler job configuration for intraday 15m data ingestion
+# This job runs daily to update rolling J-30 intraday data
+#
+# To deploy this on GCP Cloud Scheduler:
+# gcloud scheduler jobs create http intraday-ingestion-job \
+#   --schedule="0 20 * * *" \
+#   --uri="https://YOUR_BACKEND_URL/api/v1/jobs/ingest-intraday" \
+#   --http-method=POST \
+#   --headers="Authorization=Bearer YOUR_SERVICE_TOKEN" \
+#   --location=us-central1 \
+#   --time-zone="America/New_York"
+
+name: intraday-ingestion-job
+description: Daily job to ingest rolling 30-day intraday 15m price data for 300 tickers
+
+# Schedule: Daily at 8:00 PM EST (after market close at 4:00 PM + buffer)
+schedule: "0 20 * * *"
+timezone: America/New_York
+
+# Job configuration
+job:
+  type: http_endpoint
+  uri: /api/v1/jobs/ingest-intraday
+  http_method: POST
+  headers:
+    Content-Type: application/json
+  
+  # Job parameters
+  body:
+    max_tickers: 300
+    days: 30
+    batch_size: 10
+    delay: 1.0
+    batch_delay: 10
+
+# Retry configuration
+retry_config:
+  retry_count: 3
+  max_retry_duration: 3600s  # 1 hour
+  min_backoff_duration: 60s
+  max_backoff_duration: 300s
+
+# Timeout configuration
+attempt_deadline: 7200s  # 2 hours (300 tickers * ~20s each with delays)
+
+# Alerting
+alert_on_failure: true
+alert_email: admin@boursomatic.com

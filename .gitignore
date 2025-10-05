@@ -131,6 +131,9 @@ yarn-error.log*
 
 # Seed script artifacts
 seed_checkpoint.json
+seed_intraday_checkpoint.json
+seed_prices.log
+seed_prices_intraday.log
 
 # Database
 *.db
