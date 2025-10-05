@@ -1,0 +1,28 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main, staging, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [main, staging, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+
+jobs:
+  placeholder:
+    name: Frontend CI (Placeholder)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Placeholder step
+        run: |
+          echo "Frontend CI workflow placeholder"
+          echo "Will be implemented when frontend code is added"
+          echo "TODO: Add Node.js setup, npm install, eslint, prettier, and vitest/jest"

@@ -1,6 +1,9 @@
 ````markdown
 # Boursomatic
 
+![Backend CI](https://github.com/julien13630/boursomatic/workflows/Backend%20CI/badge.svg)
+![Docker Build](https://github.com/julien13630/boursomatic/workflows/Build%20Docker%20Images/badge.svg)
+
 Plateforme MVP d\'aide à la compréhension des recommandations boursières pour débutants : ingestion de données marchés (US & Euronext), génération de signaux (BUY / HOLD / SELL) via un modèle ML tabulaire (LightGBM) + justification condensée, interface web simple (Next.js + Chakra UI), et backtest pédagogique (phase ultérieure).
 
 > Objectif MVP P0 : Aller de l\'ingestion daily historique + features + entraînement modèle + inférence batch jusqu\'à une UI listant les recommandations filtrables, avec authentification de base et observabilité minimale.
@@ -125,7 +128,43 @@ Principes :
 - Alertes email : échec ingestion/inférence, rafale d\'erreurs 500
 
 ---
-## 10. Roadmap Post-P0 (extraits P1/P2)
+## 10. CI/CD Pipeline
+Le projet utilise GitHub Actions pour l\'automatisation :
+
+### Workflows actifs
+- **Backend CI** (`.github/workflows/backend-ci.yml`) :
+  - Lint avec Ruff (check + format)
+  - Tests avec pytest
+  - Déclenché sur push/PR vers main, staging, develop
+  
+- **Docker Build** (`.github/workflows/docker-build.yml`) :
+  - Build images Docker backend
+  - Push vers GitHub Container Registry (ghcr.io)
+  - Cache optimisé avec GitHub Actions cache
+  
+- **Deploy Staging** (`.github/workflows/deploy-staging.yml`) :
+  - Déploiement automatique sur Cloud Run après merge main
+  - Authentification via Workload Identity Federation
+  - Health check post-déploiement
+
+### Frontend CI (Placeholder)
+- Workflow préparé pour futur : eslint, prettier, vitest/jest
+- Sera activé lors de l\'implémentation du frontend
+
+### Secrets requis
+Configuration dans GitHub Settings > Secrets and variables > Actions :
+- `WIF_PROVIDER` : Workload Identity Provider GCP
+- `WIF_SERVICE_ACCOUNT` : Service Account GCP
+- `GCP_PROJECT_STAGING` : Project ID GCP staging
+
+### Branch Protection
+Recommandé pour `main` :
+- Require status checks: Backend CI, Docker Build
+- Require pull request reviews
+- No force push
+
+---
+## 11. Roadmap Post-P0 (extraits P1/P2)
 - Backtest (simulation naïve, paramètres, metrics, benchmark SPY/CAC, export CSV)
 - Drift monitoring simple (baisse Precision BUY)
 - Justifications améliorées (LLM templating + guardrails)
@@ -133,7 +172,7 @@ Principes :
 - Onboarding / glossary / pédagogie
 
 ---
-## 11. Contribution & Branching (Suggestion)
+## 12. Contribution & Branching (Suggestion)
 | Type | Préfixe | Exemple |
 |------|---------|---------|
 | Feature | `feat/phase-2-2-train-model` | Ajout train model |
@@ -147,7 +186,7 @@ PR Checklist (recommandé) :
 - [ ] Pas de secrets commit
 
 ---
-## 12. Variables d\'Environnement (échantillon)
+## 13. Variables d\'Environnement (échantillon)
 ```
 DATABASE_URL=postgresql+psycopg://user:pass@host:5432/boursomatic
 SECRET_KEY=changeme
@@ -156,13 +195,13 @@ REDIS_URL=redis://localhost:6379/0
 ```
 
 ---
-## 13. Limitations Connues
+## 14. Limitations Connues
 - Pas de couverture tests complète (prioriser ingestion + ML core + auth)
 - Justification modèle simple (pas encore d\'explicabilité avancée SHAP)
 - Gestion intraday minimaliste (15m, J-30)
 
 ---
-## 14. Comment Lire une Sous-Issue
+## 15. Comment Lire une Sous-Issue
 Chercher :
 - `Acceptance Criteria` → définition de DONE
 - `Checklist` → vérifications opérationnelles
@@ -170,15 +209,15 @@ Chercher :
 - `LLM Notes` → contraintes pour génération assistée
 
 ---
-## 15. Licence
+## 16. Licence
 MIT (à ajouter si pas encore en place).
 
 ---
-## 16. Avertissement
+## 17. Avertissement
 Ce projet ne fournit pas de conseil financier. Usage éducatif uniquement.
 
 ---
-## 17. Prochaines Actions Immédiates (au moment de cette révision)
+## 18. Prochaines Actions Immédiates (au moment de cette révision)
 1. Appliquer labels manquants (priority-P0, domain-*, phase-*) aux issues existantes.
 2. Implémenter ingestion daily + seed historique (#25 dépend #26 + #27).
 3. Enchaîner features (#23) → entraînement (#22) → validation (#21) → inférence (#20).
