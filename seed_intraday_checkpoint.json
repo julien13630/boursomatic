@@ -1,0 +1,17 @@
+{
+  "progress": {
+    "total_tickers": 5,
+    "processed": 5,
+    "successful": 5,
+    "failed": 0,
+    "coverage_percentage": "100.00%",
+    "bars_inserted": 0,
+    "bars_skipped": 0,
+    "quota_warnings": 0,
+    "elapsed_seconds": 0,
+    "avg_time_per_ticker": "0.00s"
+  },
+  "errors": [],
+  "last_processed_ticker_index": 4,
+  "timestamp": "2025-10-05T20:02:13.463340+00:00"
+}
