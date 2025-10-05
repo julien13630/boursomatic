@@ -4,6 +4,15 @@ Complete documentation for Boursomatic GCP infrastructure.
 
 ## Documents
 
+### 📐 [ARCHITECTURE.md](ARCHITECTURE.md)
+Visual diagrams and architecture overview.
+- High-level architecture
+- Data flow diagrams
+- Network topology
+- Security model
+- Environment comparisons
+- **Best for**: Understanding the infrastructure design
+
 ### 📘 [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
 **Start here!** Quick commands and 5-minute setup guide.
 - Prerequisites checklist
@@ -58,10 +67,11 @@ Phase 0.3 completion summary and technical details.
 ## Recommended Reading Order
 
 ### For First-Time Users
-1. **QUICK_REFERENCE.md** - Get oriented quickly
-2. **GCP_SETUP.md** - Follow detailed setup
-3. **SECRETS.md** - Configure secrets properly
-4. **SETUP_CHECKLIST.md** - Verify everything works
+1. **ARCHITECTURE.md** - Understand the design
+2. **QUICK_REFERENCE.md** - Get oriented quickly
+3. **GCP_SETUP.md** - Follow detailed setup
+4. **SECRETS.md** - Configure secrets properly
+5. **SETUP_CHECKLIST.md** - Verify everything works
 
 ### For Developers
 1. **QUICK_REFERENCE.md** - Common commands
@@ -91,8 +101,9 @@ cat SETUP_CHECKLIST.md
 
 ## Documentation Statistics
 
-- **Total Documents**: 6
-- **Total Characters**: ~45,000
+- **Total Documents**: 7
+- **Total Characters**: ~56,000
+- **Total Lines**: ~2,200
 - **Coverage**: 
   - ✅ Setup and deployment
   - ✅ Security and secrets
