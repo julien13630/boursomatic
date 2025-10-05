@@ -135,6 +135,12 @@ seed_intraday_checkpoint.json
 seed_prices.log
 seed_prices_intraday.log
 
+# Model training artifacts
+artifacts/
+*.pkl
+feature_importance_*.csv
+metrics_*.json
+
 # Database
 *.db
 *.sqlite

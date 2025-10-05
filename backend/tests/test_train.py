@@ -4,12 +4,12 @@ Tests for the training script.
 Tests key functions in train.py without requiring a full database.
 """
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
-
-import sys
-from pathlib import Path
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

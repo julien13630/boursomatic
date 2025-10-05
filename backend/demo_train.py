@@ -7,24 +7,19 @@ the training pipeline to verify it works end-to-end.
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 from sqlmodel import Session, create_engine
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from app.models import Feature, Instrument, PriceBar
+from app.models import Feature, Instrument, PriceBar, SQLModel
 
 # Create in-memory SQLite database for testing
 engine = create_engine("sqlite:///:memory:")
-
-# Import tables to create them
-from app.models import SQLModel
-
 SQLModel.metadata.create_all(engine)
 
 
@@ -52,7 +47,7 @@ def generate_synthetic_data(n_instruments: int = 5, n_days: int = 500):
         session.commit()
         
         # Generate price data for each instrument
-        start_date = datetime.now() - timedelta(days=n_days)
+        start_date = datetime.now(UTC) - timedelta(days=n_days)
         
         for instrument in instruments:
             # Generate random walk prices
@@ -93,7 +88,8 @@ def generate_synthetic_data(n_instruments: int = 5, n_days: int = 500):
                     momentum_5d = ret_5d
                     
                     # Simple volatility (std of returns)
-                    recent_returns = np.diff(prices[max(0, day - 20):day + 1]) / prices[max(0, day - 20):day]
+                    recent_prices = prices[max(0, day - 20):day + 1]
+                    recent_returns = np.diff(recent_prices) / prices[max(0, day - 20):day]
                     vol_20d = np.std(recent_returns) if len(recent_returns) > 0 else 0.0
                     
                     # Simple RSI-like indicator
