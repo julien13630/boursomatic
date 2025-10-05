@@ -4,3 +4,7 @@ sqlmodel>=0.0.22
 alembic>=1.13.0
 psycopg[binary]>=3.2.0
 python-dotenv>=1.0.0
+yfinance>=0.2.40
+pandas>=2.2.0
+requests>=2.31.0
+tenacity>=9.0.0
