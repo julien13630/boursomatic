@@ -2,9 +2,10 @@
 Boursomatic Backend API
 FastAPI application entry point
 """
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 app = FastAPI(
     title="Boursomatic API",

@@ -10,7 +10,9 @@ from sqlmodel import Session, create_engine
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/boursomatic")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/boursomatic"
+)
 
 # Create engine with appropriate pool settings
 # For production, consider using a proper pool

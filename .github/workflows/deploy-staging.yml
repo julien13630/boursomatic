@@ -1,0 +1,80 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGION: europe-west1
+  SERVICE_NAME: boursomatic-backend
+
+jobs:
+  deploy-staging:
+    name: Deploy to Cloud Run (Staging)
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+      
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          IMAGE_URL="gcr.io/${{ secrets.GCP_PROJECT_STAGING }}/${{ env.SERVICE_NAME }}:${IMAGE_TAG}"
+          
+          cd backend
+          docker build -t "${IMAGE_URL}" .
+          docker push "${IMAGE_URL}"
+          
+          echo "IMAGE_URL=${IMAGE_URL}" >> $GITHUB_ENV
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image="${{ env.IMAGE_URL }}" \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --project=${{ secrets.GCP_PROJECT_STAGING }} \
+            --allow-unauthenticated \
+            --set-env-vars="ENVIRONMENT=staging" \
+            --memory=512Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=10 \
+            --timeout=60s
+      
+      - name: Get service URL
+        id: service
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --project=${{ secrets.GCP_PROJECT_STAGING }} \
+            --format='value(status.url)')
+          echo "Service deployed to: ${SERVICE_URL}"
+          echo "url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+      
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f ${{ steps.service.outputs.url }}/health || exit 1
+          echo "Health check passed!"
