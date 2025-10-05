@@ -68,9 +68,9 @@ TICKER_LIST = [
     "BSX", "ELV", "HUM", "MCK", "COR", "IDXX", "HCA", "DXCM", "A", "IQV",
     
     # Consumer Discretionary
-    "TSLA", "HD", "MCD", "NKE", "LOW", "SBUX", "TJX", "BKNG", "ABNB", "GM",
-    "F", "MAR", "CMG", "ORLY", "YUM", "ROST", "AZO", "DHI", "LEN", "HLT",
-    "EBAY", "ETSY", "DPZ", "ULTA", "BBY", "GPC", "AAP", "KMX", "CZR", "LVS",
+    "HD", "MCD", "NKE", "LOW", "SBUX", "TJX", "BKNG", "GM", "F", "MAR",
+    "CMG", "ORLY", "YUM", "ROST", "AZO", "DHI", "LEN", "HLT", "EBAY", "ETSY",
+    "DPZ", "ULTA", "BBY", "GPC", "AAP", "KMX", "CZR", "LVS", "RCL", "CCL",
     
     # Consumer Staples
     "WMT", "PG", "COST", "KO", "PEP", "PM", "MO", "MDLZ", "CL", "EL",
@@ -86,8 +86,8 @@ TICKER_LIST = [
     "CARR", "PCAR", "URI", "JCI", "CMI", "ROK", "FAST", "ODFL", "VRSK", "EXPD",
     
     # Communication Services
-    "GOOG", "META", "NFLX", "DIS", "CMCSA", "T", "VZ", "TMUS", "CHTR", "EA",
-    "ATVI", "TTWO", "WBD", "PARA", "OMC", "IPG", "FOXA", "FOX", "NWSA", "NWS",
+    "GOOG", "NFLX", "DIS", "CMCSA", "T", "VZ", "TMUS", "CHTR", "EA", "ATVI",
+    "TTWO", "WBD", "PARA", "OMC", "IPG", "FOXA", "FOX", "NWSA", "NWS", "LYV",
     
     # Utilities
     "NEE", "DUK", "SO", "D", "AEP", "EXC", "SRE", "XEL", "WEC", "ES",
